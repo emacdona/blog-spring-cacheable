@@ -1,0 +1,7 @@
+spring:
+  h2:
+    console.enabled: true
+  jpa:
+    properties:
+      # https://stackoverflow.com/a/76137193
+      hibernate.hbm2ddl.import_files_sql_extractor: "org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor"
