@@ -16,8 +16,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
@@ -56,32 +56,32 @@ class BookRestController{
 		this.bookRepository = bookRepository;
 	}
 
-	@RequestMapping("/books")
+	@GetMapping("/books")
 	public Collection<Book> books(){
 		return bookRepository.findAll();
 	}
 
-	@RequestMapping("/books/{isbn}")
+	@GetMapping("/books/{isbn}")
 	@Cacheable(cacheNames = "books")
 	public Book bookByIsbn(@PathVariable("isbn") String isbn){
 		log.info("CACHE MISS");
 		return bookRepository.findByIsbn(isbn);
 	}
 
-	@RequestMapping("/books/{isbn}/badUpdateTitle/{title}")
+	@GetMapping("/books/{isbn}/badUpdateTitle/{title}")
 	public void badUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
 		log.info("Bad Update Title");
 		bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 
-	@RequestMapping("/books/{isbn}/betterUpdateTitle/{title}")
+	@GetMapping("/books/{isbn}/betterUpdateTitle/{title}")
 	@CacheEvict(cacheNames = "books", key = "#isbn")
 	public void betterUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
 		log.info("Better Update Title");
 		bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 
-	@RequestMapping("/books/{isbn}/bestUpdateTitle/{title}")
+	@GetMapping("/books/{isbn}/bestUpdateTitle/{title}")
 	@CachePut(cacheNames = "books", key = "#isbn")
 	public Book bestUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
 		log.info("Best Update Title");
