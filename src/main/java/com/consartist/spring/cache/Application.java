@@ -2,6 +2,7 @@ package com.consartist.spring.cache;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.EnableLoadTimeWeaving;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,22 +26,12 @@ import java.util.Collection;
 
 @SpringBootApplication
 @EnableCaching
-public class Application {
+@EnableLoadTimeWeaving
+public class Application /*implements LoadTimeWeavingConfigurer*/ {
 	public static void main(String[] args) {
+		System.setProperty("spring.devtools.restart.enabled", "false");
 		SpringApplication.run(Application.class, args);
 	}
-}
-
-@Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class Book {
-	@Id @NonNull
-	private String isbn;
-	@With
-	private String title;
-	private String author;
 }
 
 interface BookRepository extends ListCrudRepository<Book, Long> {
@@ -69,16 +61,16 @@ class BookRestController{
 	}
 
 	@GetMapping("/books/{isbn}/badUpdateTitle/{title}")
-	public void badUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
+	public Book badUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
 		log.info("Bad Update Title");
-		bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
+		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 
 	@GetMapping("/books/{isbn}/betterUpdateTitle/{title}")
 	@CacheEvict(cacheNames = "books", key = "#isbn")
-	public void betterUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
+	public Book betterUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
 		log.info("Better Update Title");
-		bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
+		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 
 	@GetMapping("/books/{isbn}/bestUpdateTitle/{title}")

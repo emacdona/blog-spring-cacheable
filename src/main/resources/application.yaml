@@ -1,4 +1,7 @@
 spring:
+  devtools:
+    livereload:
+      enabled: false
   h2:
     console.enabled: true
   jpa:

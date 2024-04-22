@@ -11,6 +11,15 @@ java {
 	sourceCompatibility = '17'
 }
 
+bootRun {
+	jvmArgs = [
+			"-javaagent:/home/emacdona/.gradle/caches/modules-2/files-2.1/org.aspectj/aspectjweaver/1.9.21/beaabaea95c7f3330f415c72ee0ffe79b51d172f/aspectjweaver-1.9.21.jar"
+			//"-javaagent:/home/emacdona/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/agents/gradle-instrumentation-agent-8.5.jar"
+			,"-javaagent:/home/emacdona/.gradle/caches/modules-2/files-2.1/org.springframework/spring-instrument/6.1.4/60c252e591e094b953f5574ad77ad740f3703c66/spring-instrument-6.1.4.jar"
+			, "--add-opens=java.base/java.lang=ALL-UNNAMED"
+	]
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -25,10 +34,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.springframework:spring-instrument'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

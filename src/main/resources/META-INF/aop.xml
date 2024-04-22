@@ -1,0 +1,13 @@
+<!DOCTYPE aspectj PUBLIC
+        "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+    <aspects>
+        <aspect name="com.consartist.spring.cache.CachedBookTagger"/>
+    </aspects>
+
+    <!--weaver options="-debug -showWeaveInfo"-->
+    <weaver>
+        <include within="com.consartist.spring.cache.CachedBookTagger"/>
+        <include within="org.springframework.cache..*"/>
+    </weaver>
+</aspectj>
