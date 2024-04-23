@@ -27,7 +27,7 @@ import java.util.Collection;
 @SpringBootApplication
 @EnableCaching
 @EnableLoadTimeWeaving
-public class Application /*implements LoadTimeWeavingConfigurer*/ {
+public class Application {
 	public static void main(String[] args) {
 		System.setProperty("spring.devtools.restart.enabled", "false");
 		SpringApplication.run(Application.class, args);
@@ -36,6 +36,22 @@ public class Application /*implements LoadTimeWeavingConfigurer*/ {
 
 interface BookRepository extends ListCrudRepository<Book, Long> {
 	Book findByIsbn(String isbn);
+}
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class Book {
+	@Id
+	@NonNull
+	private String isbn;
+	@With
+	private String title;
+	private String author;
+	@Transient
+	@With
+	private Boolean cached = false;
 }
 
 @RestController

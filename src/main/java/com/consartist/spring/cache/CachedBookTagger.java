@@ -31,9 +31,14 @@ public class CachedBookTagger {
     */
 
     // this pointcut... and not the @Before one... necessitated this:
-    // --add-opens java.base/java.lang=ALL-UNNAMED
+    // --add-opens java.base/java.lang=ALL-UNNAMED.
+    // you know... I may be able to fix this by adding whatever jar does the weaving to the classes to be reloaded (devtools.properties...)
     @Around(value = "execution(void org.springframework.cache.Cache+.put(Object+, Object+)) && args(key, value)", argNames = "pjp,key,value")
     public void tagCachedBook(ProceedingJoinPoint pjp, Object key, Object value) throws Throwable {
+        // Devtools loads project classes with another classloader, so they can be reloaded. I had to turn that off in
+        // app config b/c whatever magic does the weaving doesn't use that class loader. ie:
+        // value.getClass().getClassLoader() == the devtools one,
+        // Book.class.getClassLoader() == the "normal" one
         log.info("{}: \n\t<{}, {}>\n\t<{}, {}>",
                 value,
                 value.getClass().getClassLoader(),
