@@ -24,6 +24,6 @@ GET localhost:8080/books/0130305529/bestUpdateTitle/AboveLisp
 
 ###
 
-GET localhost:8080/books/0130305529/bestUpdateTitle/On%20Lisp
+GET localhost:8080/books/0130305529/betterUpdateTitle/On%20Lisp
 
 ###
