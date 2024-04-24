@@ -1,5 +1,9 @@
 spring:
   devtools:
+    restart:
+      # Disabled b/c I learned that Intellij will Hot Swap for me (which is faster than a spring restart).
+      # Maybe I should just remove the devtools jar, but I'll leave it for now.
+      enabled: false
     livereload:
       enabled: false
   h2:

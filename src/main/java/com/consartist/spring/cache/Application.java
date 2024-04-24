@@ -29,7 +29,6 @@ import java.util.Collection;
 @EnableLoadTimeWeaving
 public class Application {
 	public static void main(String[] args) {
-		System.setProperty("spring.devtools.restart.enabled", "false");
 		SpringApplication.run(Application.class, args);
 	}
 }
@@ -76,27 +75,23 @@ class BookRestController{
 	@GetMapping("/books/{isbn}")
 	@Cacheable(cacheNames = "books")
 	public Book bookByIsbn(@PathVariable("isbn") String isbn){
-		log.info("CACHE MISS");
 		return bookRepository.findByIsbn(isbn);
 	}
 
 	@GetMapping("/books/{isbn}/badUpdateTitle/{title}")
 	public Book badUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
-		log.info("Bad Update Title");
 		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 
 	@GetMapping("/books/{isbn}/betterUpdateTitle/{title}")
 	@CacheEvict(cacheNames = "books", key = "#isbn")
 	public Book betterUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
-		log.info("Better Update Title");
 		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 
 	@GetMapping("/books/{isbn}/bestUpdateTitle/{title}")
 	@CachePut(cacheNames = "books", key = "#isbn")
 	public Book bestUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
-		log.info("Best Update Title");
 		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
 	}
 }
