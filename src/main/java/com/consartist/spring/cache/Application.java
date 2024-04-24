@@ -1,5 +1,6 @@
 package com.consartist.spring.cache;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
@@ -28,13 +29,13 @@ import java.util.Collection;
 @EnableCaching
 @EnableLoadTimeWeaving
 public class Application {
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 }
 
 interface BookRepository extends ListCrudRepository<Book, Long> {
-	Book findByIsbn(String isbn);
+    Book findByIsbn(String isbn);
 }
 
 @Entity
@@ -42,56 +43,69 @@ interface BookRepository extends ListCrudRepository<Book, Long> {
 @NoArgsConstructor
 @AllArgsConstructor
 class Book {
-	@Id
-	@NonNull
-	private String isbn;
-	@With
-	private String title;
-	private String author;
-	@Transient
-	@With
-	private Boolean cached = false;
+    @Id
+    @NonNull
+    private String isbn;
+    @With
+    private String title;
+    private String author;
+    @Transient
+    @With
+    private Boolean cached = false;
 }
 
 @RestController
 @Slf4j
-class BookRestController{
-	private final BookRepository bookRepository;
+class BookRestController {
+    private final BookRepository bookRepository;
 
-	@Autowired
-	public BookRestController(BookRepository bookRepository) {
-		this.bookRepository = bookRepository;
-	}
+    @Autowired
+    public BookRestController(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
 
-	@GetMapping("/books/clear")
-	@CacheEvict(cacheNames = "books", allEntries = true)
-	public void clearCache(){ }
+    @Operation(summary = "Clear 'books' cache.",
+            description = "Removes all cached books from the cache.")
+    @GetMapping("/books/clear")
+    @CacheEvict(cacheNames = "books", allEntries = true)
+    public void clearCache() {
+    }
 
-	@GetMapping("/books")
-	public Collection<Book> books(){
-		return bookRepository.findAll();
-	}
+    @Operation(summary = "Retrieve all books.",
+            description = "Retrieves all books. Does not cache result(s).")
+    @GetMapping("/books")
+    public Collection<Book> books() {
+        return bookRepository.findAll();
+    }
 
-	@GetMapping("/books/{isbn}")
-	@Cacheable(cacheNames = "books")
-	public Book bookByIsbn(@PathVariable("isbn") String isbn){
-		return bookRepository.findByIsbn(isbn);
-	}
+    @Operation(summary = "Retrieve a single book.",
+            description = "Retrieve a single book, identified by ISBN. Cache the result.")
+    @GetMapping("/books/{isbn}")
+    @Cacheable(cacheNames = "books")
+    public Book bookByIsbn(@PathVariable("isbn") String isbn) {
+        return bookRepository.findByIsbn(isbn);
+    }
 
-	@GetMapping("/books/{isbn}/badUpdateTitle/{title}")
-	public Book badUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
-		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
-	}
+    @Operation(summary = "BAD: Update book title. Do not update cache.",
+            description = "BAD: Updates a single book's title, but does not add the updated book to the cache.")
+    @GetMapping("/books/{isbn}/badUpdateTitle/{title}")
+    public Book badUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title) {
+        return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
+    }
 
-	@GetMapping("/books/{isbn}/betterUpdateTitle/{title}")
-	@CacheEvict(cacheNames = "books", key = "#isbn")
-	public Book betterUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
-		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
-	}
+    @Operation(summary = "Update book title. Evict any cached copy of this book.",
+            description = "Updates a single book's title. Removes the book from the cache if present.")
+    @GetMapping("/books/{isbn}/betterUpdateTitle/{title}")
+    @CacheEvict(cacheNames = "books", key = "#isbn")
+    public Book betterUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title) {
+        return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
+    }
 
-	@GetMapping("/books/{isbn}/bestUpdateTitle/{title}")
-	@CachePut(cacheNames = "books", key = "#isbn")
-	public Book bestUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title){
-		return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
-	}
+    @Operation(summary = "Update book title. Update cache with result",
+            description = "Updates a single book's title. Updates the cache with the result.")
+    @GetMapping("/books/{isbn}/bestUpdateTitle/{title}")
+    @CachePut(cacheNames = "books", key = "#isbn")
+    public Book bestUpdateTitle(@PathVariable("isbn") String isbn, @PathVariable("title") String title) {
+        return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
+    }
 }
