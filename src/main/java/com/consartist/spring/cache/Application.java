@@ -64,6 +64,10 @@ class BookRestController{
 		this.bookRepository = bookRepository;
 	}
 
+	@GetMapping("/books/clear")
+	@CacheEvict(cacheNames = "books", allEntries = true)
+	public void clearCache(){ }
+
 	@GetMapping("/books")
 	public Collection<Book> books(){
 		return bookRepository.findAll();

@@ -11,20 +11,6 @@ java {
     sourceCompatibility = '17'
 }
 
-bootRun {
-    doFirst {
-        jvmArgs = project.configurations.findAll {
-            it.name == "compileClasspath" || it.name == "productionRuntimeClasspath" || it.name == "runtimeClasspath"
-        }.collectMany {
-            it.files
-        }.findAll {
-            it.name =~ /aspectjweaver-.*\.jar/ || it.name =~ /spring-instrument-.*\.jar/
-        }.toSet().collect {
-            "-javaagent:${it}".toString()
-        }.toList().plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
-    }
-}
-
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -47,6 +33,28 @@ dependencies {
     runtimeOnly 'org.springframework:spring-instrument'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+ext.getJvmArgs = {
+    project.configurations.findAll {
+        it.name == "compileClasspath" || it.name == "productionRuntimeClasspath" || it.name == "runtimeClasspath"
+    }.collectMany {
+        it.files
+    }.findAll {
+        it.name =~ /aspectjweaver-.*\.jar/ || it.name =~ /spring-instrument-.*\.jar/
+    }.toSet().collect {
+        "-javaagent:${it}".toString()
+    }.toList().plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
+}
+
+task getJvmArgs {
+    doLast {
+        println(project.getJvmArgs().join(" "))
+    }
+}
+
+bootRun {
+    jvmArgs = project.getJvmArgs()
 }
 
 tasks.named('test') {

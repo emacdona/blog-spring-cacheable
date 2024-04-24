@@ -1,0 +1,29 @@
+###
+
+GET localhost:8080/books/clear
+
+###
+
+GET localhost:8080/books
+
+###
+
+GET localhost:8080/books/0130305529
+
+###
+
+GET localhost:8080/books/0130305529/badUpdateTitle/OntoLisp
+
+###
+
+GET localhost:8080/books/0130305529/betterUpdateTitle/IntoLisp
+
+###
+
+GET localhost:8080/books/0130305529/bestUpdateTitle/AboveLisp
+
+###
+
+GET localhost:8080/books/0130305529/bestUpdateTitle/On%20Lisp
+
+###

@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Before;
 public class CachedBookTagger {
     /*
     // Didn't work. I'm guessing b/c Cacheable annotations caches, then returns value from cache (ie: cached was ALWAYS true, even on the first get)
+    // Actually... it probably didn't work b/c "((Book) value).setCached(true);" changes the caller's instance!
     @Before(value = "execution(void org.springframework.cache.Cache+.put(Object+, Object+)) && args(key, value)", argNames = "jp,key,value")
     public void tagCachedBook(JoinPoint jp, Object key, Object value) {
         log.info("{}: \n\t<{}, {}>\n\t<{}, {}>",
