@@ -35,15 +35,25 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-ext.getJvmArgs = {
+ext.getAgentJars = {
     project.configurations.findAll {
         it.name == "compileClasspath" || it.name == "productionRuntimeClasspath" || it.name == "runtimeClasspath"
     }.collectMany {
         it.files
     }.findAll {
         it.name =~ /aspectjweaver-.*\.jar/ || it.name =~ /spring-instrument-.*\.jar/
-    }.toSet().collect {
+    }.toSet()
+}
+
+ext.getJvmArgs = {
+    project.getAgentJars().collect {
         "-javaagent:${it}".toString()
+    }.toList().plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
+}
+
+ext.getJvmArgsForContainer = {
+    project.getAgentJars().collect {
+        "-javaagent:/workspace/BOOT-INF/lib/${it.name}".toString()
     }.toList().plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }
 
@@ -51,6 +61,12 @@ task getJvmArgs {
     doLast {
         println(project.getJvmArgs().join(" "))
     }
+}
+
+bootBuildImage {
+    imageName = "consartist/blog-spring-cacheable"
+    environment["BPE_DELIM_JAVA_TOOL_OPTIONS"] = " "
+   	environment["BPE_APPEND_JAVA_TOOL_OPTIONS"] = project.getJvmArgsForContainer().join(" ")
 }
 
 bootRun {

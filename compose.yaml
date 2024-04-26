@@ -1,0 +1,21 @@
+
+
+services:
+  web:
+    image: "consartist/blog-spring-cacheable"
+    platform: linux/amd64
+    expose:
+      - "8080"
+    deploy:
+      mode: replicated
+      replicas: 5
+      endpoint_mode: dnsrr
+  proxy:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
+    ports:
+      - "8080:8080"
+
