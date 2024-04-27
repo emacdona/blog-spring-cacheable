@@ -2,12 +2,14 @@
         "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
     <aspects>
-        <aspect name="com.consartist.spring.cache.CachedBookTagger"/>
+        <aspect name="com.consartist.spring.cache.BookAdvice"/>
     </aspects>
 
     <!--weaver options="-debug -showWeaveInfo"-->
     <weaver>
-        <include within="com.consartist.spring.cache.CachedBookTagger"/>
+        <include within="com.consartist.spring.cache.BookAdvice"/>
+        <include within="com.consartist.spring.cache.BookRestController"/>
         <include within="org.springframework.cache..*"/>
+        <include within="org.springframework.data.redis.cache..*"/>
     </weaver>
 </aspectj>

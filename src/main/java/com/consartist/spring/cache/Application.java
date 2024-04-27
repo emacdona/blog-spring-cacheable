@@ -20,11 +20,13 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.EnableLoadTimeWeaving;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 @SpringBootApplication
@@ -41,7 +43,7 @@ public class Application {
    }
 }
 
-interface BookRepository extends ListCrudRepository<Book, Long> {
+interface BookRepository extends JpaRepository<Book,  Long>, ListCrudRepository<Book, Long> {
    Book findByIsbn(String isbn);
 }
 
@@ -49,7 +51,7 @@ interface BookRepository extends ListCrudRepository<Book, Long> {
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class Book {
+class Book implements Serializable {
    @Id
    @NonNull
    private String isbn;
@@ -59,6 +61,9 @@ class Book {
    @Transient
    @With
    private Boolean cached = false;
+   @Transient
+   @With
+   private String host = null;
 }
 
 @RestController

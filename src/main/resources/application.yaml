@@ -1,4 +1,6 @@
 spring:
+  cache:
+    type: SIMPLE
   devtools:
     restart:
       # Disabled b/c I learned that Intellij will Hot Swap for me (which is faster than a spring restart).

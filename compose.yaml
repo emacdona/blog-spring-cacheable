@@ -1,15 +1,34 @@
 
 
 services:
+
+  db-init:
+    image: "consartist/blog-spring-cacheable"
+    platform: linux/amd64
+    environment:
+      SPRING_PROFILES_ACTIVE: "postgres,create-drop"
+    depends_on:
+      - db
+
   web:
     image: "consartist/blog-spring-cacheable"
     platform: linux/amd64
     expose:
       - "8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: "postgres,redis"
     deploy:
       mode: replicated
       replicas: 5
       endpoint_mode: dnsrr
+    depends_on:
+      - db-init
+
+  cache:
+    image: redis:latest
+    expose:
+      - "6379"
+
   proxy:
     image: nginx:latest
     volumes:
@@ -18,4 +37,19 @@ services:
       - web
     ports:
       - "8080:8080"
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: password
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9080:8080
 
