@@ -40,8 +40,7 @@ services:
   db:
     image: postgres
     restart: always
-    volumes:
-      - "./my-postgres.conf:/etc/postgresql/postgresql.conf"
+    command: -c 'shared_buffers=512MB' -c 'max_connections=400'
     expose:
       - "5432"
     environment:
