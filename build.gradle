@@ -71,6 +71,20 @@ bootBuildImage {
    	environment["BPE_APPEND_JAVA_TOOL_OPTIONS"] = project.getJvmArgsForContainer().join(" ")
 }
 
+task copyAgentJars {
+   doLast {
+       project.getAgentJars().collect() { agentJar ->
+           copy {
+               from agentJar
+               into layout.buildDirectory.dir("agents")
+               rename { String fileName ->
+                   fileName.replaceAll(/-(\d+\.)+jar$/, ".jar")
+               }
+           }
+       }
+   }
+}
+
 bootRun {
     jvmArgs = project.getJvmArgs()
 }

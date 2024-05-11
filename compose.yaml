@@ -3,7 +3,10 @@
 services:
 
   db-init:
-    image: "consartist/blog-spring-cacheable"
+    build:
+      context: .
+      tags:
+        - "consartist/blog-spring-cacheable"
     platform: linux/amd64
     environment:
       SPRING_PROFILES_ACTIVE: "postgres,create-drop"
