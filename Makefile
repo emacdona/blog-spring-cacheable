@@ -12,3 +12,6 @@ down:
 	docker compose -f docker/compose-individual-with-individual-cache.yaml down
 	docker compose -f docker/compose-replicas-with-individual-cache.yaml down
 	docker compose -f docker/compose-replicas-with-shared-cache.yaml down
+
+clean: down
+	-docker rmi "consartist/blog-spring-cacheable"

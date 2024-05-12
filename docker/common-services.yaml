@@ -1,0 +1,65 @@
+---
+
+x-var: &APP_IMAGE_TAG
+  "consartist/blog-spring-cacheable"
+
+services:
+  # In each of our docker files, we have one service that is responsible for building
+  # the app image. This will force a build b/c there is no fallback "image:" that would
+  # preclude a build if the image existed.
+  app-builder:
+    build:
+      dockerfile: docker/Dockerfile
+      context: ..
+      tags:
+        - *APP_IMAGE_TAG
+    platform: linux/amd64
+
+  # Annoyingly, if we have two services that use the same image, we can't have a "secondary"
+  # rely on a "primary" to build the image. EVEN WITH an explicit "depends_on", the secondary won't
+  # succeed if the image does not exist already. You should still have an explicit "depends_on", though...
+  # so that the service you are depending on to build your image builds it before this service defaults
+  # to whatever "image:" it finds in docker.
+  app:
+    extends: app-builder
+    image: *APP_IMAGE_TAG
+    expose:
+      - "8080"
+
+  replicated-app:
+    extends: app
+    deploy:
+      mode: replicated
+      replicas: 5
+      endpoint_mode: dnsrr
+
+  redis:
+    image: redis:latest
+    expose:
+      - "6379"
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres
+    restart: always
+    command: -c 'shared_buffers=512MB' -c 'max_connections=400'
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: password
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9080:8080
+

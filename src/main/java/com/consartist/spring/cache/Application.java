@@ -34,7 +34,10 @@ import java.util.Collection;
 @EnableLoadTimeWeaving
 @OpenAPIDefinition(
     servers = {
-       @Server(url = "http://localhost:8080/", description = "Default Server URL")
+       @Server(url = "http://localhost:8080/", description = "Default Server URL"),
+
+       // A concession to my strange local development environment
+       @Server(url = "http://host:8080/", description = "Default Server URL")
     }
 )
 public class Application {

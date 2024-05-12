@@ -3,53 +3,35 @@
 services:
 
   db-init:
-    build:
-      dockerfile: docker/Dockerfile
-      context: ..
-      tags:
-        - "consartist/blog-spring-cacheable"
-    platform: linux/amd64
+    extends:
+      file: common-services.yaml
+      service: app-builder
     environment:
       SPRING_PROFILES_ACTIVE: "postgres,create-drop"
     depends_on:
       - db
 
   web:
-    image: "consartist/blog-spring-cacheable"
-    platform: linux/amd64
-    expose:
-      - "8080"
+    extends:
+      file: common-services.yaml
+      service: replicated-app
     environment:
       SPRING_PROFILES_ACTIVE: "postgres"
-    deploy:
-      mode: replicated
-      replicas: 5
-      endpoint_mode: dnsrr
     depends_on:
       - db-init
 
   proxy:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - web
-    ports:
-      - "8080:8080"
+    extends:
+      file: common-services.yaml
+      service: nginx
 
   db:
-    image: postgres
-    restart: always
-    command: -c 'shared_buffers=512MB' -c 'max_connections=400'
-    expose:
-      - "5432"
-    environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: password
+    extends:
+      file: common-services.yaml
+      service: postgres
 
   adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 9080:8080
+    extends:
+      file: common-services.yaml
+      service: adminer
 

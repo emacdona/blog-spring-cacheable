@@ -2,11 +2,8 @@
 
 services:
   web:
-    build:
-      dockerfile: docker/Dockerfile
-      context: ..
-      tags:
-        - "consartist/blog-spring-cacheable"
-    platform: linux/amd64
+    extends:
+      file: common-services.yaml
+      service: app-builder
     ports:
       - "8080:8080"
