@@ -53,36 +53,16 @@ ext.getJvmArgs = {
     }.toList().plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }
 
-ext.getJvmArgsForContainer = {
+ext.getJvmArgsForBootBuildImageContainer = {
     project.getAgentJars().collect {
         "-javaagent:/workspace/BOOT-INF/lib/${it.name}".toString()
     }.toList().plus("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }
 
-task getJvmArgs {
-    doLast {
-        println(project.getJvmArgs().join(" "))
-    }
-}
-
 bootBuildImage {
     imageName = "consartist/blog-spring-cacheable"
     environment["BPE_DELIM_JAVA_TOOL_OPTIONS"] = " "
-   	environment["BPE_APPEND_JAVA_TOOL_OPTIONS"] = project.getJvmArgsForContainer().join(" ")
-}
-
-task copyAgentJars {
-   doLast {
-       project.getAgentJars().collect() { agentJar ->
-           copy {
-               from agentJar
-               into layout.buildDirectory.dir("agents")
-               rename { String fileName ->
-                   fileName.replaceAll(/-(\d+\.)+jar$/, ".jar")
-               }
-           }
-       }
-   }
+   	environment["BPE_APPEND_JAVA_TOOL_OPTIONS"] = project.getJvmArgsForBootBuildImageContainer().join(" ")
 }
 
 bootRun {
@@ -95,4 +75,11 @@ test {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+task getJvmArgs {
+    description = 'Prints the JVM arguments to the console. Useful for setting up Intellij run configurations.'
+    doLast {
+        println(project.getJvmArgs().join(" "))
+    }
 }

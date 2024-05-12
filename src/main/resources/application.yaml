@@ -12,7 +12,10 @@ spring:
     livereload:
       enabled: false
   h2:
-    console.enabled: true
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
   jpa:
     properties:
       # https://stackoverflow.com/a/76137193

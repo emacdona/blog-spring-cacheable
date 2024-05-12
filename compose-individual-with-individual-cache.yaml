@@ -1,0 +1,11 @@
+---
+
+services:
+  web:
+    build:
+      context: .
+      tags:
+        - "consartist/blog-spring-cacheable"
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
