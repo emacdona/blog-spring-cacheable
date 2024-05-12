@@ -4,7 +4,8 @@ services:
 
   db-init:
     build:
-      context: .
+      dockerfile: docker/Dockerfile
+      context: ..
       tags:
         - "consartist/blog-spring-cacheable"
     platform: linux/amd64
@@ -19,18 +20,13 @@ services:
     expose:
       - "8080"
     environment:
-      SPRING_PROFILES_ACTIVE: "postgres,redis"
+      SPRING_PROFILES_ACTIVE: "postgres"
     deploy:
       mode: replicated
       replicas: 5
       endpoint_mode: dnsrr
     depends_on:
       - db-init
-
-  cache:
-    image: redis:latest
-    expose:
-      - "6379"
 
   proxy:
     image: nginx:latest
