@@ -9,7 +9,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: "postgres,create-drop"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   web:
     extends:
