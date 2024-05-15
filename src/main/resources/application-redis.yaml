@@ -5,3 +5,8 @@ spring:
     redis:
       host: cache
       port: 6379
+
+management:
+  health:
+    redis:
+      enabled: true
