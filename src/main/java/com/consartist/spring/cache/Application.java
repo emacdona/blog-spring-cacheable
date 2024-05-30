@@ -136,6 +136,8 @@ class FibonacciController {
     @Lazy
     FibonacciController self;
 
+    @Operation(summary = "Find the nth Fibonacci number.",
+            description = "Finds this nth Fibonacci number without caching intermediate results. Slow!")
     @GetMapping("/fibonacci/slow/{n}")
     public BigInteger slowFibonacci(@PathVariable("n") BigInteger n) {
         if (n.compareTo(BigInteger.ONE) < 0) {
@@ -149,6 +151,8 @@ class FibonacciController {
         }
     }
 
+    @Operation(summary = "Find the nth Fibonacci number.",
+            description = "Finds this nth Fibonacci number -- and caches intermediate results. Fast!")
     @GetMapping("/fibonacci/fast/{n}")
     @Cacheable("fibonacci")
     public BigInteger fastFibonacci(@PathVariable("n") BigInteger n) {
