@@ -9,7 +9,10 @@ import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -130,46 +133,86 @@ class BookRestController {
   }
 }
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+class FibonacciResult implements Serializable {
+  private BigInteger result;
+  @Builder.Default
+  @With
+  private Integer callCount = 0;
+  @Builder.Default
+  @With
+  private Boolean cached = false;
+  @Builder.Default
+  @With
+  private String host = null;
+}
+
 @RestController
 @RequestMapping("/fibonacci")
 @Slf4j
-class FibonacciController {
+class FibonacciRestController {
   // We need an injected reference so that Spring generated proxies run (because Spring generated
   // proxies are how Caching -- and a slew of other Spring features -- are implemented.
   @Autowired
   @Lazy
-  FibonacciController self;
+  private FibonacciRestController self;
+
+  private static final ThreadLocal<Integer> callCount = new ThreadLocal<>();
+
+  private final BiFunction<Function<BigInteger, BigInteger>, BigInteger, BigInteger>
+      fibonacciCommon = (g, n) -> {
+        if (n.compareTo(BigInteger.ONE) < 0) {
+          return BigInteger.ZERO;
+        } else if (n.equals(BigInteger.ONE)) {
+          return BigInteger.ONE;
+        } else if (n.equals(BigInteger.TWO)) {
+          return BigInteger.ONE;
+        } else {
+          return g.apply(n.subtract(BigInteger.ONE)).add(g.apply(n.subtract(BigInteger.TWO)));
+        }
+      };
+
+  public BigInteger slowFibonacci(@PathVariable("n") BigInteger n) {
+    callCount.set(callCount.get() + 1);
+    return fibonacciCommon.apply(self::slowFibonacci, n);
+  }
+
+  @Cacheable("fibonacciNumbers")
+  public BigInteger fastFibonacci(@PathVariable("n") BigInteger n) {
+    callCount.set(callCount.get() + 1);
+    return fibonacciCommon.apply(self::fastFibonacci, n);
+  }
 
   @Operation(summary = "Find the nth Fibonacci number.",
       description = "Finds this nth Fibonacci number without caching intermediate results. Slow!")
   @GetMapping("/slow/{n}")
-  public BigInteger slowFibonacci(@PathVariable("n") BigInteger n) {
-    if (n.compareTo(BigInteger.ONE) < 0) {
-      return BigInteger.ZERO;
-    } else if (n.equals(BigInteger.ONE)) {
-      return BigInteger.ONE;
-    } else if (n.equals(BigInteger.TWO)) {
-      return BigInteger.ONE;
-    } else {
-      return self.slowFibonacci(n.subtract(BigInteger.ONE))
-          .add(self.slowFibonacci(n.subtract(BigInteger.TWO)));
-    }
+  public FibonacciResult slowFibonacciEndpoint(@PathVariable("n") BigInteger n) {
+    callCount.set(0);
+    return FibonacciResult.builder()
+        .result(fibonacciCommon.apply(self::slowFibonacci, n))
+        .callCount(callCount.get())
+        .build();
   }
 
   @Operation(summary = "Find the nth Fibonacci number.",
       description = "Finds this nth Fibonacci number -- and caches intermediate results. Fast!")
   @GetMapping("/fast/{n}")
-  @Cacheable("fibonacci")
-  public BigInteger fastFibonacci(@PathVariable("n") BigInteger n) {
-    if (n.compareTo(BigInteger.ONE) < 0) {
-      return BigInteger.ZERO;
-    } else if (n.equals(BigInteger.ONE)) {
-      return BigInteger.ONE;
-    } else if (n.equals(BigInteger.TWO)) {
-      return BigInteger.ONE;
-    } else {
-      return self.fastFibonacci(n.subtract(BigInteger.ONE))
-          .add(self.fastFibonacci(n.subtract(BigInteger.TWO)));
-    }
+  @Cacheable("fibonacciPayloads")
+  public FibonacciResult fastFibonacciEndpoint(@PathVariable("n") BigInteger n) {
+    callCount.set(0);
+    return FibonacciResult.builder()
+        .result(fibonacciCommon.apply(self::fastFibonacci, n))
+        .callCount(callCount.get())
+        .build();
+  }
+
+  @Operation(summary = "Clear all Fibonacci caches.",
+      description = "Clears all Fibonacci caches.")
+  @GetMapping("/clear")
+  @CacheEvict(cacheNames = {"fibonacciNumbers", "fibonacciPayloads"}, allEntries = true)
+  public void clearCache() {
   }
 }
