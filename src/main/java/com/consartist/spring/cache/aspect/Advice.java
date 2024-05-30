@@ -1,7 +1,9 @@
-package com.consartist.spring.cache;
+package com.consartist.spring.cache.aspect;
 
 import static org.apache.commons.lang3.reflect.MethodUtils.invokeMethod;
 
+import com.consartist.spring.cache.data.Book;
+import com.consartist.spring.cache.data.FibonacciResult;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,17 +26,18 @@ public class Advice {
   public void cachePut() {
   }
 
-  @Pointcut(value = "execution(Book com.consartist.spring.cache.BookRestController.*(..))")
+  @SuppressWarnings("checkstyle:LineLength")
+  @Pointcut(value = "execution(com.consartist.spring.cache.data.Book com.consartist.spring.cache.rest.BookRestController.*(..))")
   public void bookReturned() {
   }
 
   @SuppressWarnings("checkstyle:LineLength")
-  @Pointcut(value = "execution(FibonacciResult com.consartist.spring.cache.FibonacciRestController.*(..))")
+  @Pointcut(value = "execution(com.consartist.spring.cache.data.FibonacciResult com.consartist.spring.cache.rest.FibonacciRestController.*(..))")
   public void fibonacciResultReturned() {
   }
 
   @SuppressWarnings("checkstyle:LineLength")
-  @Pointcut(value = "execution(java.util.Collection<Book> com.consartist.spring.cache.BookRestController.*(..))")
+  @Pointcut(value = "execution(java.util.Collection<com.consartist.spring.cache.data.Book> com.consartist.spring.cache.rest.BookRestController.*(..))")
   public void booksReturned() {
   }
 
