@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
@@ -69,6 +70,7 @@ class Book implements Serializable {
 }
 
 @RestController
+@RequestMapping("/books")
 @Slf4j
 class BookRestController {
   private final BookRepository bookRepository;
@@ -80,21 +82,21 @@ class BookRestController {
 
   @Operation(summary = "Clear 'books' cache.",
       description = "Removes all cached books from the cache.")
-  @GetMapping("/books/clear")
+  @GetMapping("/clear")
   @CacheEvict(cacheNames = "books", allEntries = true)
   public void clearCache() {
   }
 
   @Operation(summary = "Retrieve all books.",
       description = "Retrieves all books. Does not cache result(s).")
-  @GetMapping("/books")
+  @GetMapping
   public Collection<Book> books() {
     return bookRepository.findAll();
   }
 
   @Operation(summary = "Retrieve a single book.",
       description = "Retrieve a single book, identified by ISBN. Cache the result.")
-  @GetMapping("/books/{isbn}")
+  @GetMapping("/{isbn}")
   @Cacheable(cacheNames = "books")
   public Book bookByIsbn(@PathVariable("isbn") String isbn) {
     return bookRepository.findByIsbn(isbn);
@@ -103,7 +105,7 @@ class BookRestController {
   @SuppressWarnings("checkstyle:LineLength")
   @Operation(summary = "BAD: Update book title. Do not update cache.",
       description = "BAD: Updates a single book's title, but does not add the updated book to the cache.")
-  @GetMapping("/books/{isbn}/badUpdateTitle/{title}")
+  @GetMapping("/{isbn}/badUpdateTitle/{title}")
   public Book badUpdateTitle(@PathVariable("isbn") String isbn,
                              @PathVariable("title") String title) {
     return bookRepository.save(bookRepository.findByIsbn(isbn).withTitle(title));
@@ -111,7 +113,7 @@ class BookRestController {
 
   @Operation(summary = "Update book title. Evict any cached copy of this book.",
       description = "Updates a single book's title. Removes the book from the cache if present.")
-  @GetMapping("/books/{isbn}/betterUpdateTitle/{title}")
+  @GetMapping("/{isbn}/betterUpdateTitle/{title}")
   @CacheEvict(cacheNames = "books", key = "#isbn")
   public Book betterUpdateTitle(@PathVariable("isbn") String isbn,
                                 @PathVariable("title") String title) {
@@ -120,7 +122,7 @@ class BookRestController {
 
   @Operation(summary = "Update book title. Update cache with result",
       description = "Updates a single book's title. Updates the cache with the result.")
-  @GetMapping("/books/{isbn}/bestUpdateTitle/{title}")
+  @GetMapping("/{isbn}/bestUpdateTitle/{title}")
   @CachePut(cacheNames = "books", key = "#isbn")
   public Book bestUpdateTitle(@PathVariable("isbn") String isbn,
                               @PathVariable("title") String title) {
@@ -129,6 +131,7 @@ class BookRestController {
 }
 
 @RestController
+@RequestMapping("/fibonacci")
 @Slf4j
 class FibonacciController {
   // We need an injected reference so that Spring generated proxies run (because Spring generated
@@ -139,7 +142,7 @@ class FibonacciController {
 
   @Operation(summary = "Find the nth Fibonacci number.",
       description = "Finds this nth Fibonacci number without caching intermediate results. Slow!")
-  @GetMapping("/fibonacci/slow/{n}")
+  @GetMapping("/slow/{n}")
   public BigInteger slowFibonacci(@PathVariable("n") BigInteger n) {
     if (n.compareTo(BigInteger.ONE) < 0) {
       return BigInteger.ZERO;
@@ -155,7 +158,7 @@ class FibonacciController {
 
   @Operation(summary = "Find the nth Fibonacci number.",
       description = "Finds this nth Fibonacci number -- and caches intermediate results. Fast!")
-  @GetMapping("/fibonacci/fast/{n}")
+  @GetMapping("/fast/{n}")
   @Cacheable("fibonacci")
   public BigInteger fastFibonacci(@PathVariable("n") BigInteger n) {
     if (n.compareTo(BigInteger.ONE) < 0) {
