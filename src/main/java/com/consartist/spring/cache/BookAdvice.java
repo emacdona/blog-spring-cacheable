@@ -92,9 +92,12 @@ public class BookAdvice {
       public BookTagger tag(@NonNull String tagMethodName, Object tagValue, @NonNull Class<?> tagValueClass) {
          maybeBook = maybeBook == null ?
                null :
+               // https://stackoverflow.com/questions/1921238/getclass-getclassloader-is-null-why
+               (maybeBook.getClass().getClassLoader() != null &&
+
                // If you're using dev tools, value will have been loaded by the RefreshClassLoader.
                // Book.class will be loaded by the AppClassLoader.
-               maybeBook.getClass().getClassLoader().loadClass(Book.class.getName()).isInstance(maybeBook) ?
+               maybeBook.getClass().getClassLoader().loadClass(Book.class.getName()).isInstance(maybeBook)) ?
                      tagValue != null ?
                            invokeMethod(maybeBook, tagMethodName, tagValue) :
                            invokeMethod(maybeBook, tagMethodName, new Object[]{null}, new Class<?>[]{tagValueClass})
