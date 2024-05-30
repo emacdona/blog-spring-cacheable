@@ -56,6 +56,7 @@ public class BookAdvice {
   }
 
   @Around(value = "booksReturned()", argNames = "pjp")
+  @SuppressWarnings("unchecked")
   public Object tagReturnedBooksWithHost(ProceedingJoinPoint pjp) throws Throwable {
     return ((Collection) pjp.proceed()).stream()
         .map(
