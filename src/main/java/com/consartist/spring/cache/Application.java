@@ -23,7 +23,6 @@ import org.springframework.context.annotation.EnableLoadTimeWeaving;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -128,14 +127,17 @@ class BookRestController {
     }
 }
 
-@Component
-class FibonacciCalculator {
+@RestController
+@Slf4j
+class FibonacciController {
     // We need an injected reference so that Spring generated proxies run (because Spring generated
     // proxies are how Caching -- and a slew of other Spring features -- are implemented.
-    @Autowired @Lazy
+    @Autowired
+    @Lazy
     FibonacciController self;
 
-    public BigInteger slowFibonacci(BigInteger n) {
+    @GetMapping("/fibonacci/slow/{n}")
+    public BigInteger slowFibonacci(@PathVariable("n") BigInteger n) {
         if (n.compareTo(BigInteger.ONE) < 0) {
             return BigInteger.ZERO;
         } else if (n.equals(BigInteger.ONE)) {
@@ -147,8 +149,9 @@ class FibonacciCalculator {
         }
     }
 
+    @GetMapping("/fibonacci/fast/{n}")
     @Cacheable("fibonacci")
-    public BigInteger fastFibonacci(BigInteger n) {
+    public BigInteger fastFibonacci(@PathVariable("n") BigInteger n) {
         if (n.compareTo(BigInteger.ONE) < 0) {
             return BigInteger.ZERO;
         } else if (n.equals(BigInteger.ONE)) {
@@ -158,22 +161,5 @@ class FibonacciCalculator {
         } else {
             return self.fastFibonacci(n.subtract(BigInteger.ONE)).add(self.fastFibonacci(n.subtract(BigInteger.TWO)));
         }
-    }
-}
-
-@RestController
-@Slf4j
-class FibonacciController {
-    @Autowired
-    private FibonacciCalculator fibonacciCalculator;
-
-    @GetMapping("/fibonacci/slow/{n}")
-    public BigInteger slowFibonacci(@PathVariable("n") BigInteger n) {
-        return fibonacciCalculator.slowFibonacci(n);
-    }
-
-    @GetMapping("/fibonacci/fast/{n}")
-    public BigInteger fastFibonacci(@PathVariable("n") BigInteger n) {
-        return fibonacciCalculator.fastFibonacci(n);
     }
 }
