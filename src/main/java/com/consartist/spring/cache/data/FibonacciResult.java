@@ -1,5 +1,6 @@
 package com.consartist.spring.cache.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigInteger;
 import lombok.AllArgsConstructor;
@@ -12,10 +13,11 @@ import lombok.With;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FibonacciResult implements Serializable {
+public class FibonacciResult implements Serializable, CacheMeta {
   private BigInteger result;
   @Builder.Default
   @With
+  @Schema(description = "The number of intermediate, recursive calls made to obtain this result.")
   private Integer callCount = 0;
   @Builder.Default
   @With

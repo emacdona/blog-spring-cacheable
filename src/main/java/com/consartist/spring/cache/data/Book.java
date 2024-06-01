@@ -14,7 +14,7 @@ import lombok.With;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Book implements Serializable {
+public class Book implements Serializable, CacheMeta {
   @Id
   @NonNull
   private String isbn;
