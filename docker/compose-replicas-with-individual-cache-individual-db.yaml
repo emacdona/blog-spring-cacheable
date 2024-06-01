@@ -1,0 +1,19 @@
+---
+
+services:
+  build:
+    extends:
+      file: common-services.yaml
+      service: app-builder
+
+  web:
+    extends:
+      file: common-services.yaml
+      service: replicated-app
+    depends_on:
+      - build
+
+  proxy:
+    extends:
+      file: common-services.yaml
+      service: nginx
