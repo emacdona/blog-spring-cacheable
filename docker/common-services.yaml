@@ -30,7 +30,7 @@ services:
     extends: app
     deploy:
       mode: replicated
-      replicas: 5
+      replicas: ${REPLICA_COUNT:-5}
       endpoint_mode: dnsrr
 
   redis:
