@@ -75,14 +75,33 @@ clean: down
 	-docker rmi "consartist/blog-spring-cacheable"
 
 # --------------------------------------------------------------------------------
-# Targets that exercise the application
+# Targets that exercise the application's "fibonacci" endpoints
 # --------------------------------------------------------------------------------
+.PHONY: fib-slow
+fib-slow:
+	 time curl -sX 'GET' 'http://$(apphost):8080/fibonacci/slow/35'  | jq -c '.'
+
+.PHONY: fib-fast
+fib-fast:
+	 time curl -sX 'GET' 'http://$(apphost):8080/fibonacci/fast/100'  | jq -c '.'
+
+# --------------------------------------------------------------------------------
+# Targets that exercise the application's "book" endpoints
+# --------------------------------------------------------------------------------
+.PHONY: clear-cache
+clear-cache:
+	curl -s http://$(apphost):8080/books/clear;
+
 .PHONY: clear-cache-for-all-replicas
 clear-cache-for-all-replicas:
 	for i in {1..$(replica-count)};
 	do
 		curl -s http://$(apphost):8080/books/clear;
 	done
+
+.PHONY: restore-title
+restore-title:
+	curl -s http://$(apphost):8080/books/$(isbn)/bestUpdateTitle/$(original-title) | jq -c '.'
 
 .PHONY: restore-title-for-all-replicas
 restore-title-for-all-replicas:
@@ -96,7 +115,10 @@ get-book:
 	for i in {1..99};
 	do
 		curl -s http://$(apphost):8080/books/$(isbn) | jq -c '. | {host, cached,title}';
-	done | sort | uniq -c
+	done \
+	| sort | uniq -c \
+	| perl -pe 's/^\s*(\d+)\s*\{(.*)$$/{"count":\1,\2/' \
+	| jq -s '.' | jq 'sort_by(.host,-.count)' | jq -c '.[]'
 
 .PHONY: bad-update-title
 bad-update-title:
