@@ -7,7 +7,7 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-apphost = host
+apphost = localhost
 replica-count = 5
 request-count = 99
 isbn = 0130305529
