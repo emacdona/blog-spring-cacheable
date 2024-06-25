@@ -76,7 +76,7 @@ services:
       # This creates a race condition where the db-init container starts (b/c this check succeeded) and tries to create
       # a database in a moment where the DB is currently restarting. MOST of the time, the restart is fast enough and
       # the db-init container succeeds... which made this an enormous pain in the ass to track down.
-      test: ["CMD-SHELL", "pg_isready", "-U", "app", "--host", "db", "--port", *PG_CONTAINER_PORT]
+      test: ["CMD", "pg_isready", "--username", "app", "--dbname", "app", "--host", "db", "--port", *PG_CONTAINER_PORT]
       interval: 5s
       timeout: 5s
       retries: 10
