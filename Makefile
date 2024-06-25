@@ -9,7 +9,7 @@ MAKEFLAGS += --no-builtin-rules
 
 apphost = localhost
 replica-count = 5
-request-count = 99
+request-count = 98
 isbn = 0130305529
 original-title = "On%20Lisp"
 new-title = "HELLO%20WORLD"
@@ -115,13 +115,11 @@ restore-title-for-all-replicas:
 
 .PHONY: get-book
 get-book:
-	for i in {1..99};
+	for i in {1..$(request-count)};
 	do
 		curl -s http://$(apphost):8080/books/$(isbn) | jq -c '. | {host, cached,title}';
 	done \
-	| sort | uniq -c \
-	| perl -pe 's/^\s*(\d+)\s*\{(.*)$$/{"count":\1,\2/' \
-	| jq -s '.' | jq 'sort_by(.host,-.count)' | jq -c '.[]'
+	| sort | uniq -c
 
 .PHONY: bad-update-title
 bad-update-title:
