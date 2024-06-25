@@ -14,6 +14,9 @@ isbn = 0130305529
 original-title = "On%20Lisp"
 new-title = "HELLO%20WORLD"
 
+export BUILDKIT_PROGRESS := plain
+export COMPOSE_MENU := 0
+
 # --------------------------------------------------------------------------------
 # Targets that start the application
 # --------------------------------------------------------------------------------
