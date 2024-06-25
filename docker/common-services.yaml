@@ -61,7 +61,15 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: password
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U app" ]
+      # Note: this assumes that the service you create by extending this one is named "db".
+      # The reason we need to specify a host and port here is because the "host" forces the test to be made
+      # via TCP _ONLY_ -- instead of TCP or Unix Domain Sockets.
+      # The reason that TCP only is important is that when the f*cking container starts, PG does some initialisation,
+      # reaches a point where this check COULD succeed (via Unix Domain Sockets), and THEN IT RESTARTS THE DATABASE.
+      # This creates a race condition where the db-init container starts (b/c this check succeeded) and tries to create
+      # a database in a moment where the DB is currently restarting. MOST of the time, the restart is fast enough and
+      # the db-init container succeeds... which made this an enormous pain in the ass to track down.
+      test: [ "CMD-SHELL", "pg_isready -U app --host db --port 5432" ]
       interval: 5s
       timeout: 5s
       retries: 10
