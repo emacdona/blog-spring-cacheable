@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Spring Declarative Caching Blog Post Sample Application</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+        table{
+            border-collapse: collapse;
+        }
+        td{
+            border: 1px solid black;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Spring Declarative Caching Blog Post Sample Application</h1>
+<p>Congrats! You've successfully deployed this application. Following are some links you may find useful.</p>
+
+<h2>Swagger</h2>
+<p>Use this link <a href="http://localhost:8080/swagger-ui/index.html">http://localhost:8080/swagger-ui/index.html</a> to access the Swagger UI.</p>
+
+
+<h2>Database</h2>
+<div th:switch="${#arrays.contains(@environment.getActiveProfiles(), 'postgres')}">
+    <span th:case="true">
+        <p>Looks like you're using the Postgres backend</p>
+        <p>Use this link <a href="http://localhost:9080/">http://localhost:9080/</a> to access the Adminer application.</p>
+        <p>Use the following information to connect to the database:</p>
+        <table>
+            <tr><td>System:</td><td>PostgreSQL</td></tr>
+            <tr><td>Username:</td><td th:text="|${@environment.getProperty('spring.datasource.username')}|"/></tr>
+            <tr><td>Password:</td><td th:text="|${@environment.getProperty('spring.datasource.password')}|"/></tr>
+            <tr><td>Database:</td><td>app</td></tr>
+        </table>
+    </span>
+    <span th:case="false">
+        <p>Looks like you're using the H2 backend</p>
+        <p>Use this link <a href="http://localhost:8080/h2-console/">http://localhost:8080/h2-console/</a> to access the H2 Console.</p>
+        <p>Use the following information to connect to the database:</p>
+        <table>
+            <tr><td>JDBC URL:</td><td>jdbc:h2:mem:app</td></tr>
+            <tr><td>User Name:</td><td th:text="|${@environment.getProperty('spring.datasource.username')}|"/></tr>
+            <tr><td>Password:</td><td th:text="|${@environment.getProperty('spring.datasource.password')}|"/></tr>
+        </table>
+    </span>
+</div>
+
+<!--
+<p th:text="|${@environment.getProperty('spring.datasource.url')}|"/>
+-->
+</body>
+</html>
